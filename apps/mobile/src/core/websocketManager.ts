@@ -39,10 +39,19 @@ class WebSocketManager {
           import('../plugins/index').then(({ pluginManager }) => {
             pluginManager.executePlugin(data.plugin, data.params || {})
               .then(res => {
+                let outputStr = '';
+                if (data.plugin === 'BatteryPlugin') {
+                  outputStr = `Level: ${res.level}%\nCharging: ${res.charging ? 'Yes' : 'No'}`;
+                } else if (data.plugin === 'FlashlightPlugin') {
+                  outputStr = `Flashlight is now ${res.state}`;
+                } else {
+                  outputStr = JSON.stringify(res);
+                }
+                
                 store.dispatch(addMessage({
                   id: Date.now().toString(),
                   type: 'output',
-                  content: `[${data.plugin}]:\nLevel: ${res.level}%\nCharging: ${res.charging}`,
+                  content: `[${data.plugin}]:\n${outputStr}`,
                   timestamp: Date.now()
                 }));
               })
