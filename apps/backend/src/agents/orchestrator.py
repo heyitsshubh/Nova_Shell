@@ -11,7 +11,7 @@ async def orchestrator_node(state: AgentState):
     if not plugin_name:
         return state
         
-    CLIENT_PLUGINS = ["BatteryPlugin", "FlashlightPlugin"]
+    CLIENT_PLUGINS = ["BatteryPlugin", "FlashlightPlugin", "OpenAppPlugin"]
     
     if plugin_name in CLIENT_PLUGINS:
         return {

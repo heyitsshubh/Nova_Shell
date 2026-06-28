@@ -32,7 +32,8 @@ def planner_node(state: AgentState):
     # Add known local plugins for the LLM to know about them
     available_plugins.extend([
         {"name": "BatteryPlugin", "description": "Reads device battery status and level.", "permissions": []},
-        {"name": "FlashlightPlugin", "description": "Turns the device flashlight on or off. Accepts param 'action' ('on'/'off')", "permissions": ["camera"]}
+        {"name": "FlashlightPlugin", "description": "Turns the device flashlight on or off. Accepts param 'action' ('on'/'off')", "permissions": ["camera"]},
+        {"name": "OpenAppPlugin", "description": "Opens an external application on the device. Accepts param 'appName' (e.g. 'whatsapp', 'youtube', 'settings')", "permissions": []}
     ])
     
     plugins_json = json.dumps(available_plugins, indent=2)

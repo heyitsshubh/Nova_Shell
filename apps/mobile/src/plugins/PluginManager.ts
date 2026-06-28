@@ -1,3 +1,7 @@
+import { BatteryPlugin } from './BatteryPlugin';
+import { FlashlightPlugin } from './FlashlightPlugin';
+import { OpenAppPlugin } from './OpenAppPlugin';
+
 export interface PluginConfig {
   name: string;
   description: string;
@@ -11,6 +15,12 @@ export interface BasePlugin {
 
 class PluginManager {
   private plugins: Map<string, BasePlugin> = new Map();
+
+  constructor() {
+    this.register(new BatteryPlugin());
+    this.register(new FlashlightPlugin());
+    this.register(new OpenAppPlugin());
+  }
 
   register(plugin: BasePlugin) {
     this.plugins.set(plugin.config.name, plugin);

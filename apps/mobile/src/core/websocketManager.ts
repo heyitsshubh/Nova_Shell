@@ -44,6 +44,8 @@ class WebSocketManager {
                   outputStr = `Level: ${res.level}%\nCharging: ${res.charging ? 'Yes' : 'No'}`;
                 } else if (data.plugin === 'FlashlightPlugin') {
                   outputStr = `Flashlight is now ${res.state}`;
+                } else if (data.plugin === 'OpenAppPlugin') {
+                  outputStr = res.message;
                 } else {
                   outputStr = JSON.stringify(res);
                 }
