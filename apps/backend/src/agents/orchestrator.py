@@ -11,18 +11,22 @@ async def orchestrator_node(state: AgentState):
     if not plugin_name:
         return state
         
+    CLIENT_PLUGINS = ["BatteryPlugin", "FlashlightPlugin"]
+    
+    if plugin_name in CLIENT_PLUGINS:
+        return {
+            "execution_result": {"client_execution_required": True, "plugin": plugin_name, "params": state.get("plugin_params", {})}
+        }
+        
     plugin = registry.get_plugin(plugin_name)
     if not plugin:
         return {
             "execution_result": {"error": f"Plugin {plugin_name} not found in registry."}
         }
         
-    # Validation / Permission checks would go here.
-    
+    # Server plugin execution
     params = state.get("plugin_params", {})
     try:
-        # Note: If it's a mobile native plugin, the actual execution is a WebSocket emit.
-        # This implementation represents server-side execution.
         result = await plugin.execute(params)
         return {
             "execution_result": result

@@ -35,6 +35,30 @@ class WebSocketManager {
             content: data.content,
             timestamp: Date.now()
           }));
+        } else if (data.type === 'execute_plugin') {
+          import('../plugins/index').then(({ pluginManager }) => {
+            pluginManager.executePlugin(data.plugin, data.params || {})
+              .then(res => {
+                store.dispatch(addMessage({
+                  id: Date.now().toString(),
+                  type: 'output',
+                  content: `[${data.plugin}]:\nLevel: ${res.level}%\nCharging: ${res.charging}`,
+                  timestamp: Date.now()
+                }));
+              })
+              .catch(err => {
+                store.dispatch(addMessage({
+                  id: Date.now().toString(),
+                  type: 'error',
+                  content: `[${data.plugin}] Error: ${err.message}`,
+                  timestamp: Date.now()
+                }));
+              })
+              .finally(() => {
+                store.dispatch(setProcessing(false));
+              });
+          });
+          return; // Do not unset processing state here
         } else if (data.type === 'error') {
           store.dispatch(addMessage({
             id: Date.now().toString(),
