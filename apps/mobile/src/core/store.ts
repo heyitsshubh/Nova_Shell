@@ -6,6 +6,15 @@ export const store = configureStore({
   reducer: {
     terminal: terminalReducer
   },
+  middleware: (getDefaultMiddleware) => 
+    getDefaultMiddleware({
+      serializableCheck: {
+        warnAfter: 128
+      },
+      immutableCheck: {
+        warnAfter: 128
+      }
+    })
 });
 
 setupListeners(store.dispatch);

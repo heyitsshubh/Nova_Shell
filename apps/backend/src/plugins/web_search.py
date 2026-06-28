@@ -14,9 +14,10 @@ class WebSearchPlugin(BasePlugin):
         if not query:
             return {"error": "Query parameter is required"}
             
-        # TODO: Implement actual DuckDuckGo/Tavily search API
-        return {
-            "results": [
-                {"title": f"Top result for '{query}'", "snippet": "This is a simulated search result returned by the WebSearchPlugin."}
-            ]
-        }
+        try:
+            from ddgs import DDGS
+            with DDGS() as ddgs:
+                results = [r for r in ddgs.text(query, max_results=3)]
+                return {"results": results}
+        except Exception as e:
+            return {"error": f"Search failed: {str(e)}"}

@@ -1,4 +1,8 @@
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_google_genai import ChatGoogleGenerativeAI
 from .state import AgentState
+from ..core.config import settings
+import json
 
 def formatter_node(state: AgentState):
     """
@@ -9,18 +13,37 @@ def formatter_node(state: AgentState):
         return state
         
     result = state.get("execution_result")
+    input_text = state.get("input_text", "")
     
     if result:
         if "error" in result:
             return {"final_response": f"Error: {result['error']}"}
         
-        # Plugin-specific formatting (could also be delegated to the plugin itself in a real architecture)
-        if state.get("selected_plugin") == "BatteryPlugin":
-            level = result.get('level', 0)
-            charging = result.get('charging', False)
-            status = "charging" if charging else "on battery power"
-            return {"final_response": f"Your device is currently at {level}% and is {status}."}
+        # If no API key, fallback to simple string format
+        if not settings.GEMINI_API_KEY:
+            if state.get("selected_plugin") == "BatteryPlugin":
+                level = result.get('level', 0)
+                charging = result.get('charging', False)
+                status = "charging" if charging else "on battery power"
+                return {"final_response": f"Your device is currently at {level}% and is {status}."}
+            return {"final_response": f"Executed successfully: {result}"}
             
-        return {"final_response": f"Executed successfully: {result}"}
-        
+        # Use LLM to format the response
+        try:
+            llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", google_api_key=settings.GEMINI_API_KEY)
+            prompt = ChatPromptTemplate.from_messages([
+                ("system", "You are the Responder Agent for NovaShell OS. The user asked a query and a system plugin was executed to get data. Format the plugin's raw data into a natural, conversational, and concise response. Do not mention that you used a plugin or JSON."),
+                ("human", "User query: {query}\n\nRaw Data:\n{data}")
+            ])
+            chain = prompt | llm
+            response = chain.invoke({
+                "query": input_text,
+                "data": json.dumps(result, indent=2)
+            })
+            return {"final_response": response.content}
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return {"final_response": f"Executed successfully: {result}"}
+            
     return {"final_response": "I'm sorry, I couldn't process that command or the plugin returned no data."}

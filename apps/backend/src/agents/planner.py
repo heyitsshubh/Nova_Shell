@@ -9,6 +9,7 @@ from ..plugins.registry import registry
 from ..core.config import settings
 
 class PlannerOutput(BaseModel):
+    """The structured plan and intent derived from the user's input."""
     intent: str = Field(description="The primary intent of the user (e.g., 'play_music', 'check_battery', 'web_search')")
     plan: List[str] = Field(description="Step-by-step plan to achieve the goal")
     plugin_name: Optional[str] = Field(description="The exact name of the plugin to use from the provided available plugins list, if any")
@@ -70,7 +71,7 @@ def planner_node(state: AgentState):
 
     # Real LLM Invocation
     try:
-        llm = ChatGoogleGenerativeAI(model="gemini-1.5-pro", google_api_key=settings.GEMINI_API_KEY)
+        llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", google_api_key=settings.GEMINI_API_KEY)
         structured_llm = llm.with_structured_output(PlannerOutput)
         
         chain = prompt | structured_llm
@@ -89,6 +90,8 @@ def planner_node(state: AgentState):
             "final_response": result.direct_response
         }
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return {
             "intent": "error",
             "plan": ["Report error"],
